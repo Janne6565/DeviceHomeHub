@@ -1,0 +1,9 @@
+server:
+  port: 8000
+credentials:
+  password-hash: "password_hash"
+api:
+  callback: "url_endpoint"
+spring:
+  config:
+    location: classpath:/,file:/app/config/
