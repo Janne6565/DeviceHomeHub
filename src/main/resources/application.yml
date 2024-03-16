@@ -1,9 +1,10 @@
 server:
   port: 8000
 credentials:
-  password-hash: "password_hash"
+  password-hash: "$2a$12$pIhfdyMpulDe7lQzF8tmau2gufKXuAZMrqEg07289JKmqD5nvm0xm"
 api:
   callback: "url_endpoint"
 spring:
   config:
     location: classpath:/,file:/app/config/
+paths: path-to-file.json, path-to-second-file.json

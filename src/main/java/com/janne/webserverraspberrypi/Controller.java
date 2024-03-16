@@ -1,15 +1,13 @@
 package com.janne.webserverraspberrypi;
 
 
+import com.janne.webserverraspberrypi.Websockets.ServiceManagerWebsocket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @RestController
@@ -20,10 +18,11 @@ public class Controller {
 
     @Value("${api.callback}")
     private String callbackUrl;
-    private final BCryptPasswordEncoder passwordEncoder;
 
-    public Controller(BCryptPasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
+    private final Util util;
+
+    public Controller(Util util) {
+        this.util = util;
     }
 
     @GetMapping("/")
@@ -33,9 +32,7 @@ public class Controller {
 
     @PostMapping("/turn-on")
     public ResponseEntity pcTurnOn(@RequestBody String userProvidedPassword) {
-        userProvidedPassword = userProvidedPassword.replace("%", "!");
-        System.out.println("Matching: " + userProvidedPassword + " to: " + storedPasswordHash);
-        if (passwordEncoder.matches(userProvidedPassword, storedPasswordHash)) {
+        if (util.checkPassword(userProvidedPassword)) {
             WebClient webClient = WebClient.create();
             String responseBody = webClient.get()
                     .uri(callbackUrl)
@@ -45,7 +42,17 @@ public class Controller {
 
             return new ResponseEntity<>("Password Matched", HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("Password Mismatch", HttpStatus.MULTI_STATUS);
+            return new ResponseEntity<>("Password Mismatch", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @GetMapping("/execute_action")
+    public ResponseEntity executeAction(@RequestParam String deviceId, @RequestParam String service, @RequestParam String action, @RequestParam String password) {
+        if (!util.checkPassword(password)) {
+            return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
+        }
+
+        ServiceManagerWebsocket.executeAction(deviceId, service, action);
+        return new ResponseEntity("Action Send", HttpStatus.OK);
     }
 }
