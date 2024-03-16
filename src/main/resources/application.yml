@@ -1,7 +1,7 @@
 server:
   port: 8000
 credentials:
-  password-hash: "$2a$12$pIhfdyMpulDe7lQzF8tmau2gufKXuAZMrqEg07289JKmqD5nvm0xm"
+  password-hash: "passwordhash"
 api:
   callback: "url_endpoint"
 spring:
