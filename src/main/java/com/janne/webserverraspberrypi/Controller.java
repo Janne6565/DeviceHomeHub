@@ -55,4 +55,14 @@ public class Controller {
         ServiceManagerWebsocket.executeAction(deviceId, service, action);
         return new ResponseEntity("Action Send", HttpStatus.OK);
     }
+
+    @GetMapping("/load_cover")
+    public ResponseEntity loadCover(@RequestParam String url, @RequestParam String password) {
+        if (!util.checkPassword(password)) {
+            return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
+        }
+
+        com.janne.webserverraspberrypi.Websockets.AudioWebsocketHandler.sendInformation("album", url);
+        return new ResponseEntity("Album Cover Send", HttpStatus.OK);
+    }
 }
