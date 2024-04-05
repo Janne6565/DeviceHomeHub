@@ -19,7 +19,7 @@ public class ScheduledTask {
     private String[] filePaths;
 
     private Map<String, Object> lastSend = new HashMap<>();
-    @Scheduled(fixedRate = 300)
+    @Scheduled(fixedRate = 100)
     public void myScheduledMethod() {
         // Your code logic goes here
         Map<String, Object> completeResult = new HashMap<>();
