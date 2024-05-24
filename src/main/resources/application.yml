@@ -7,4 +7,7 @@ api:
 spring:
   config:
     location: classpath:/,file:/app/config/
-paths: path-to-file.json, path-to-second-file.json
+paths: fileOne.json,fileTwo.json
+pathSources: fileSourceOne,fileSourceTwo
+files:
+  discord: path-to-discord.json

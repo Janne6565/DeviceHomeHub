@@ -1,4 +1,4 @@
-package com.janne.webserverraspberrypi.Websockets;
+package com.janne.webserverraspberrypi.websockets;
 
 import org.springframework.web.socket.*;
 
@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class ServiceManagerWebsocket implements WebSocketHandler {
 
-    private static Map<String, List<String[]>> device_services = new HashMap<>();
     private static Map<String, List<WebSocketSession>> sessions = new HashMap<>();
 
     @Override
@@ -30,6 +29,7 @@ public class ServiceManagerWebsocket implements WebSocketHandler {
         }
 
         sessions.get(received).add(session);
+
         System.out.println("Registered new Listener for device_id: " + session);
     }
 

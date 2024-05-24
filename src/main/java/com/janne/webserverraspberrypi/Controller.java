@@ -1,14 +1,14 @@
 package com.janne.webserverraspberrypi;
 
 
-import com.janne.webserverraspberrypi.Websockets.ServiceManagerWebsocket;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.janne.webserverraspberrypi.services.GameCoverService;
+import com.janne.webserverraspberrypi.websockets.ServiceManagerWebsocket;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
+import com.janne.webserverraspberrypi.websockets.AudioWebsocketHandler;
 
 @RestController
 public class Controller {
@@ -19,10 +19,16 @@ public class Controller {
     @Value("${api.callback}")
     private String callbackUrl;
 
+    private final GameCoverService gameCoverService;
+
     private final Util util;
 
-    public Controller(Util util) {
+    private final AudioWebsocketHandler websocketHandler;
+
+    public Controller(GameCoverService gameCoverService, Util util, AudioWebsocketHandler websocketHandler) {
+        this.gameCoverService = gameCoverService;
         this.util = util;
+        this.websocketHandler = websocketHandler;
     }
 
     @GetMapping("/")
@@ -48,6 +54,7 @@ public class Controller {
 
     @GetMapping("/execute_action")
     public ResponseEntity executeAction(@RequestParam String deviceId, @RequestParam String service, @RequestParam String action, @RequestParam String password) {
+
         if (!util.checkPassword(password)) {
             return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
         }
@@ -62,7 +69,18 @@ public class Controller {
             return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
         }
 
-        com.janne.webserverraspberrypi.Websockets.AudioWebsocketHandler.sendInformation("album", url);
+        websocketHandler.sendInformation("albumCover", url, "discord");
         return new ResponseEntity("Album Cover Send", HttpStatus.OK);
+    }
+    
+    
+    @GetMapping("/load_game")
+    public ResponseEntity loadGame(@RequestParam String url, @RequestParam String password) {
+        if (!util.checkPassword(password)) {
+            return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
+        } else {
+            gameCoverService.dumpGameCover(url);
+            return new ResponseEntity("Game Cover Send", HttpStatus.OK);
+        }
     }
 }
