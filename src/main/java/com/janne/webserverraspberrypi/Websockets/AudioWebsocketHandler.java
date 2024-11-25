@@ -4,7 +4,11 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AudioWebsocketHandler implements WebSocketHandler {
@@ -35,12 +39,7 @@ public class AudioWebsocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        for (WebSocketSession s : new ArrayList<>(connections)) {
-            if (s.getId().equals(session.getId())) {
-                connections.remove(s);
-                break;
-            }
-        }
+        connections.removeIf(webSocketSession -> webSocketSession.getId().equals(session.getId()));
     }
 
     @Override
@@ -61,7 +60,12 @@ public class AudioWebsocketHandler implements WebSocketHandler {
                 session.sendMessage(message);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                System.out.println("Removing session: " + session.getId());
+                System.out.println("Removing session: " + session);
+                try {
+                    session.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 connections.remove(session);
             }
         }

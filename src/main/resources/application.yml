@@ -7,7 +7,11 @@ api:
 spring:
   config:
     location: classpath:/,file:/app/config/
+files:
+  discord: ""
 paths: fileOne.json,fileTwo.json
 pathSources: fileSourceOne,fileSourceTwo
-files:
-  discord: path-to-discord.json
+devices: example_lamp
+device_operations: toggle/on/off
+device_password: device_password
+device_ips: device_ip

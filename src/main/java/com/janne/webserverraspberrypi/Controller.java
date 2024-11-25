@@ -2,33 +2,29 @@ package com.janne.webserverraspberrypi;
 
 
 import com.janne.webserverraspberrypi.services.GameCoverService;
-import com.janne.webserverraspberrypi.websockets.ServiceManagerWebsocket;
+import com.janne.webserverraspberrypi.services.deviceManager.DeviceService;
+import com.janne.webserverraspberrypi.websockets.AudioWebsocketHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
-import com.janne.webserverraspberrypi.websockets.AudioWebsocketHandler;
 
 @RestController
 public class Controller {
 
-    @Value("${credentials.password-hash}")
-    private String storedPasswordHash;
-
+    private final DeviceService deviceService;
+    private final GameCoverService gameCoverService;
+    private final Util util;
+    private final AudioWebsocketHandler websocketHandler;
     @Value("${api.callback}")
     private String callbackUrl;
 
-    private final GameCoverService gameCoverService;
-
-    private final Util util;
-
-    private final AudioWebsocketHandler websocketHandler;
-
-    public Controller(GameCoverService gameCoverService, Util util, AudioWebsocketHandler websocketHandler) {
+    public Controller(GameCoverService gameCoverService, Util util, AudioWebsocketHandler websocketHandler, DeviceService deviceService) {
         this.gameCoverService = gameCoverService;
         this.util = util;
         this.websocketHandler = websocketHandler;
+        this.deviceService = deviceService;
     }
 
     @GetMapping("/")
@@ -52,15 +48,51 @@ public class Controller {
         }
     }
 
-    @GetMapping("/execute_action")
-    public ResponseEntity executeAction(@RequestParam String deviceId, @RequestParam String service, @RequestParam String action, @RequestParam String password) {
-
+    @GetMapping("/device/{device}/{action}")
+    public ResponseEntity executeAction(@PathVariable("device") String deviceId, @PathVariable("action") String action, @RequestParam String password) {
+        System.out.println("Running on: " + deviceId + " " + action);
         if (!util.checkPassword(password)) {
-            return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ServiceManagerWebsocket.executeAction(deviceId, service, action);
-        return new ResponseEntity("Action Send", HttpStatus.OK);
+        String res = deviceService.executeAction(deviceId, action);
+        if (res == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok().body(res);
+    }
+
+    @GetMapping("/get_status")
+    public ResponseEntity<String> getStatus(@RequestParam String deviceId, @RequestParam String serviceName, @RequestParam String password) {
+        if (!util.checkPassword(password)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(deviceService.isServiceRunning(deviceId, serviceName) ? "1" : "0");
+    }
+
+    @GetMapping("/execute_action")
+    public ResponseEntity executeAction(@RequestParam String deviceId, @RequestParam String service, @RequestParam String action, @RequestParam String password) {
+        if (!util.checkPassword(password)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        switch (action) {
+            case "start":
+                deviceService.startService(deviceId, service);
+                break;
+            case "stop":
+                deviceService.stopService(deviceId, service);
+                break;
+            case "restart":
+                deviceService.restartService(deviceId, service);
+                break;
+            default:
+                return ResponseEntity.badRequest().body("Invalid operation (start/stop/restart); given: " + action);
+        }
+
+        return ResponseEntity.ok("Action Send");
     }
 
     @GetMapping("/load_cover")
@@ -72,8 +104,8 @@ public class Controller {
         websocketHandler.sendInformation("albumCover", url, "discord");
         return new ResponseEntity("Album Cover Send", HttpStatus.OK);
     }
-    
-    
+
+
     @GetMapping("/load_game")
     public ResponseEntity loadGame(@RequestParam String url, @RequestParam String password) {
         if (!util.checkPassword(password)) {

@@ -40,7 +40,9 @@ public class ServiceManagerWebsocket implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        return;
+        for (String received : sessions.keySet()) {
+            sessions.get(received).removeIf(webSocketSession -> webSocketSession.getId().equals(session.getId()));
+        }
     }
 
     @Override
@@ -56,6 +58,11 @@ public class ServiceManagerWebsocket implements WebSocketHandler {
             try {
                 session.sendMessage(new TextMessage(compiled_message));
             } catch (IOException | IllegalStateException e) {
+                try {
+                    session.close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 devices.remove(session);
             }
         }
