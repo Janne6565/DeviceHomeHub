@@ -1,7 +1,6 @@
 package com.janne.webserverraspberrypi.services;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
-import com.janne.webserverraspberrypi.websockets.AudioWebsocketHandler;
+import com.janne.webserverraspberrypi.websockets.AudioWebsocketService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,7 @@ import static com.janne.webserverraspberrypi.Util.parseJsonFile;
 
 @Service
 public class FileScannerService {
-    private final AudioWebsocketHandler audioWebsocketHandler;
+    private final AudioWebsocketService audioWebsocketService;
     @Value("${paths}")
     private List<String> paths;
     @Value("${pathSources}")
@@ -21,11 +20,12 @@ public class FileScannerService {
 
     private Map<String, Object> lastSend = new HashMap<>();
 
-    public FileScannerService(AudioWebsocketHandler audioWebsocketHandler) {
-        this.audioWebsocketHandler = audioWebsocketHandler;
+    public FileScannerService(AudioWebsocketService audioWebsocketService) {
+        this.audioWebsocketService = audioWebsocketService;
     }
 
     public void runScan() {
+        float currentTime = System.currentTimeMillis();
         Map<String, Object> completeResult = new HashMap<>();
         Map<String, String> resultSources = new HashMap<>();
         for (int i = 0; i < paths.size(); i++) {
@@ -41,7 +41,7 @@ public class FileScannerService {
         for (String key : completeResult.keySet()) {
             if (lastSend == null || !completeResult.get(key).equals(lastSend.get(key))) {
                 System.out.println("Found not send parameter: " + key + " " + completeResult.get(key) + " from source: " + resultSources.get(key));
-                audioWebsocketHandler.sendInformation(key, completeResult.get(key).toString(), resultSources.get(key));
+                audioWebsocketService.sendInformation(key, completeResult.get(key).toString(), resultSources.get(key), currentTime);
                 lastSend.put(key, completeResult.get(key));
             }
         }

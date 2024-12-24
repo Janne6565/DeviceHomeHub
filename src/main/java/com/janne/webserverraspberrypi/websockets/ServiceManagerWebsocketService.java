@@ -1,16 +1,29 @@
 package com.janne.webserverraspberrypi.websockets;
 
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-public class ServiceManagerWebsocket implements WebSocketHandler {
+@Service
+@EnableScheduling
+public class ServiceManagerWebsocketService implements WebSocketHandler {
 
-    private static Map<String, List<WebSocketSession>> sessions = new HashMap<>();
+    private Map<String, List<WebSocketSession>> sessions = new HashMap<>();
+
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
+    private void cleanUp() {
+        System.out.println("Running cleanup");
+        for (String key : sessions.keySet()) {
+            List<WebSocketSession> lookingAt = sessions.get(key);
+            lookingAt.removeIf(Objects::isNull);
+            lookingAt.removeIf(session -> !session.isOpen());
+        }
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -50,23 +63,20 @@ public class ServiceManagerWebsocket implements WebSocketHandler {
         return false;
     }
 
-    public static void executeAction(String deviceId, String service, String action) {
+    public void executeAction(String deviceId, String service, String action) {
         List<WebSocketSession> devices = sessions.getOrDefault(deviceId, new ArrayList<>());
-        String compiled_message = "{'service': '" + service + "', 'action': '" + action + "'}";
+        String compiled_message = "{'service': '" + encodeString(service) + "', 'action': '" + encodeString(action) + "'}";
 
         for (WebSocketSession session : new ArrayList<>(devices)) {
             try {
                 session.sendMessage(new TextMessage(compiled_message));
             } catch (IOException | IllegalStateException e) {
-                try {
-                    session.close();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                devices.remove(session);
+                e.printStackTrace();
             }
         }
-
     }
 
+    private String encodeString(String str) {
+        return str.replaceAll("\"", "\\\\\"");
+    }
 }

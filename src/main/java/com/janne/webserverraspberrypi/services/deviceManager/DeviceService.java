@@ -2,7 +2,8 @@ package com.janne.webserverraspberrypi.services.deviceManager;
 
 import com.janne.webserverraspberrypi.Util;
 import com.janne.webserverraspberrypi.services.RequestService;
-import com.janne.webserverraspberrypi.websockets.ServiceManagerWebsocket;
+import com.janne.webserverraspberrypi.websockets.ServiceManagerWebsocketService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,12 +11,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.HashMap;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Service
 public class DeviceService {
 
-    private final Util util;
-    private final WebClient webClient;
+    private final ServiceManagerWebsocketService serviceManagerWebsocketService;
     private final RequestService requestService;
+
     private Map<String, Device> parsedDevices = new HashMap<>();
     private boolean initialized = false;
     private Map<String, Map<String, Boolean>> servicesRunning = new HashMap<>();
@@ -28,12 +30,6 @@ public class DeviceService {
     private String deviceOperations;
     @Value("${device_ips}")
     private String deviceIps;
-
-    public DeviceService(Util util, WebClient webClient, RequestService requestService) {
-        this.util = util;
-        this.webClient = webClient;
-        this.requestService = requestService;
-    }
 
     private void initialize() {
         String[] deviceIdsSeperated = deviceIds.split(",");
@@ -77,7 +73,7 @@ public class DeviceService {
 
         servicesRunning.get(deviceId).put(serviceName, true);
 
-        ServiceManagerWebsocket.executeAction(deviceId, serviceName, "start");
+        serviceManagerWebsocketService.executeAction(deviceId, serviceName, "start");
     }
 
     public void stopService(String deviceId, String serviceName) {
@@ -86,7 +82,7 @@ public class DeviceService {
         }
 
         servicesRunning.get(deviceId).put(serviceName, false);
-        ServiceManagerWebsocket.executeAction(deviceId, serviceName, "stop");
+        serviceManagerWebsocketService.executeAction(deviceId, serviceName, "stop");
     }
 
     public void restartService(String deviceId, String serviceName) {
@@ -95,7 +91,7 @@ public class DeviceService {
         }
 
         servicesRunning.get(deviceId).put(serviceName, true);
-        ServiceManagerWebsocket.executeAction(deviceId, serviceName, "restart");
+        serviceManagerWebsocketService.executeAction(deviceId, serviceName, "restart");
     }
 
     public boolean isServiceRunning(String deviceId, String serviceName) {

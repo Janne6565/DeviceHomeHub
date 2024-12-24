@@ -3,7 +3,7 @@ package com.janne.webserverraspberrypi;
 
 import com.janne.webserverraspberrypi.services.GameCoverService;
 import com.janne.webserverraspberrypi.services.deviceManager.DeviceService;
-import com.janne.webserverraspberrypi.websockets.AudioWebsocketHandler;
+import com.janne.webserverraspberrypi.websockets.AudioWebsocketService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,11 @@ public class Controller {
     private final DeviceService deviceService;
     private final GameCoverService gameCoverService;
     private final Util util;
-    private final AudioWebsocketHandler websocketHandler;
+    private final AudioWebsocketService websocketHandler;
     @Value("${api.callback}")
     private String callbackUrl;
 
-    public Controller(GameCoverService gameCoverService, Util util, AudioWebsocketHandler websocketHandler, DeviceService deviceService) {
+    public Controller(GameCoverService gameCoverService, Util util, AudioWebsocketService websocketHandler, DeviceService deviceService) {
         this.gameCoverService = gameCoverService;
         this.util = util;
         this.websocketHandler = websocketHandler;
@@ -101,7 +101,7 @@ public class Controller {
             return new ResponseEntity("Password Mismatch", HttpStatus.UNAUTHORIZED);
         }
 
-        websocketHandler.sendInformation("albumCover", url, "discord");
+        websocketHandler.sendInformation("albumCover", url, "discord", System.currentTimeMillis());
         return new ResponseEntity("Album Cover Send", HttpStatus.OK);
     }
 
