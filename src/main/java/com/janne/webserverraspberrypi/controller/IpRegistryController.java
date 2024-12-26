@@ -24,7 +24,7 @@ public class IpRegistryController {
         return ResponseEntity.ok(ipRegistryService.getDeviceIp(deviceId));
     }
 
-    @PostMapping("/{deviceId}")
+    @GetMapping("/set/{deviceId}")
     public ResponseEntity<String> setDeviceIp(@PathVariable String deviceId, @RequestParam("ip") String ip, @RequestParam("secret") String secret) {
         log.info("set device ip: {} (ip: {}; secret: {})", deviceId, ip, secret);
         try {
