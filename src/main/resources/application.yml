@@ -15,3 +15,4 @@ devices: example_lamp
 device_operations: toggle/on/off
 device_password: device_password
 device_ips: device_ip
+device_infos: test:hallo, pupsi:128
