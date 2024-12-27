@@ -1,5 +1,6 @@
 package com.janne.webserverraspberrypi.websockets;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @EnableScheduling
 public class AudioWebsocketService implements WebSocketHandler {
@@ -17,7 +19,7 @@ public class AudioWebsocketService implements WebSocketHandler {
 
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     private void cleanUp() {
-        System.out.println("Running cleanup");
+        log.info("Running cleanup");
         connections.removeIf(Objects::isNull);
         connections.removeIf(session -> !session.isOpen());
     }
