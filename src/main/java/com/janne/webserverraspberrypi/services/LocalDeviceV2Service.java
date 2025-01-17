@@ -28,6 +28,9 @@ public class LocalDeviceV2Service {
 
     private String sendDeviceRequest(String operation, String deviceId, String deviceSecret) {
         String deviceIp = ipRegistryService.getDeviceIp(deviceId);
+        if (deviceIp != null) {
+            return "Not Found";
+        }
         return requestService.sendRequest("POST", deviceIp + "/" + deviceSecret + "/" + operation, "");
     }
 }
