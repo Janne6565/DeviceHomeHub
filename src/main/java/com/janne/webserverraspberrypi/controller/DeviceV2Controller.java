@@ -13,6 +13,11 @@ public class DeviceV2Controller {
     private final DeviceV2WebsocketService deviceV2WebsocketService;
 
     @GetMapping("/status/{deviceId}")
+    public ResponseEntity<String> getDeviceStatusGet(@PathVariable("deviceId") String deviceId) {
+        return ResponseEntity.ok(deviceV2WebsocketService.getDeviceStatus(deviceId));
+    }
+
+    @PostMapping("/status/{deviceId}")
     public ResponseEntity<String> getDeviceStatus(@PathVariable("deviceId") String deviceId) {
         return ResponseEntity.ok(deviceV2WebsocketService.getDeviceStatus(deviceId));
     }

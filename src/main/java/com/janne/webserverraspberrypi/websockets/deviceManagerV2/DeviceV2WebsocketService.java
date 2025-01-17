@@ -48,6 +48,7 @@ public class DeviceV2WebsocketService implements WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+        log.info("Message received: {}", message.getPayload());
         String messageValue = (String) message.getPayload();
         GenericWebSocketMessage webSocketMessage = jacksonObjectMapper.readValue(messageValue, GenericWebSocketMessage.class);
         switch (webSocketMessage.getType()) {
