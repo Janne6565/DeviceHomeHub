@@ -23,14 +23,14 @@ public class LocalDeviceV2Service {
     }
 
     public String getDeviceStatus(String deviceId, String deviceSecret) {
-        return sendDeviceRequest("get", deviceId, deviceSecret);
+        return sendDeviceRequest("status", deviceId, deviceSecret);
     }
 
-    public String executeWriteAction(String deviceId, String action, String deviceSecret) {
+    public String executeWriteAction(String deviceId, String deviceSecret, String action) {
         return sendDeviceRequest("write/" + action, deviceId, deviceSecret);
     }
 
-    public String executeReadAction(String deviceId, String action, String deviceSecret) {
+    public String executeReadAction(String deviceId, String deviceSecret, String action) {
         return sendDeviceRequest("read/" + action, deviceId, deviceSecret);
     }
 
