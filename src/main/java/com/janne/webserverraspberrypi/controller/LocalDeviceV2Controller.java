@@ -1,6 +1,7 @@
 package com.janne.webserverraspberrypi.controller;
 
 import com.janne.webserverraspberrypi.services.LocalDeviceV2Service;
+import com.janne.webserverraspberrypi.util.BenqProjectorUtilitys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,11 @@ public class LocalDeviceV2Controller {
     @GetMapping("/execute/{deviceId}/{deviceSecret}/{operation}")
     public ResponseEntity<String> executeGet(@PathVariable String deviceId, @PathVariable String deviceSecret, @PathVariable String operation) {
         return ResponseEntity.ok(localDeviceV2Service.executeReadAction(deviceId, deviceSecret, operation));
+    }
+
+    @GetMapping("/getBeamerStatus/{deviceId}/{deviceSecret}")
+    public ResponseEntity<String> getBeamerStatus(@PathVariable String deviceId, @PathVariable String deviceSecret) {
+        return ResponseEntity.ok(BenqProjectorUtilitys.parseStatusString(localDeviceV2Service.getDeviceStatus(deviceId, deviceSecret)));
     }
 
     @GetMapping("/status/{deviceId}/{deviceSecret}")
