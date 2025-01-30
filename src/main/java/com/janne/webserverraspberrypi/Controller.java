@@ -48,14 +48,19 @@ public class Controller {
         }
     }
 
-    @GetMapping("/device/{device}/{action}")
+    @PostMapping("/device/{device}/{action}")
     public ResponseEntity executeAction(@PathVariable("device") String deviceId, @PathVariable("action") String action, @RequestParam String password) {
-        System.out.println("Running on: " + deviceId + " " + action);
-        if (!util.checkPassword(password)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        String res = deviceService.executeAction(deviceId, password, action);
+        if (res == null) {
+            return ResponseEntity.badRequest().build();
         }
 
-        String res = deviceService.executeAction(deviceId, action);
+        return ResponseEntity.ok().body(res);
+    }
+
+    @GetMapping("/device/{device}/{action}")
+    public ResponseEntity executeActionGet(@PathVariable("device") String deviceId, @PathVariable("action") String action, @RequestParam String password) {
+        String res = deviceService.executeAction(deviceId, password, action);
         if (res == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -64,15 +69,11 @@ public class Controller {
     }
 
     @GetMapping("/get_status")
-    public ResponseEntity<String> getStatus(@RequestParam String deviceId, @RequestParam String serviceName, @RequestParam String password) {
-        if (!util.checkPassword(password)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
+    public ResponseEntity<String> getStatus(@RequestParam String deviceId, @RequestParam String serviceName) {
         return ResponseEntity.ok(deviceService.isServiceRunning(deviceId, serviceName) ? "1" : "0");
     }
 
-    @GetMapping("/execute_action")
+    @PostMapping("/execute_action")
     public ResponseEntity executeAction(@RequestParam String deviceId, @RequestParam String service, @RequestParam String action, @RequestParam String password) {
         if (!util.checkPassword(password)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

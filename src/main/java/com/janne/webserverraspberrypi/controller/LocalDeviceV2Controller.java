@@ -18,12 +18,22 @@ public class LocalDeviceV2Controller {
 
     @PostMapping("/stop/{deviceId}/{deviceSecret}")
     public ResponseEntity<String> stop(@PathVariable String deviceId, @PathVariable String deviceSecret) {
-        return ResponseEntity.ok(localDeviceV2Service.stopDevice(deviceId, deviceSecret));
+        return ResponseEntity.ok(localDeviceV2Service.toggleDevice(deviceId, deviceSecret));
     }
 
     @PostMapping("/toggle/{deviceId}/{deviceSecret}")
     public ResponseEntity<String> toggle(@PathVariable String deviceId, @PathVariable String deviceSecret) {
         return ResponseEntity.ok(localDeviceV2Service.toggleDevice(deviceId, deviceSecret));
+    }
+
+    @PostMapping("/execute/{deviceId}/{deviceSecret}/{operation}")
+    public ResponseEntity<String> executePost(@PathVariable String deviceId, @PathVariable String deviceSecret, @PathVariable String operation) {
+        return ResponseEntity.ok(localDeviceV2Service.executeWriteAction(deviceId, deviceSecret, operation));
+    }
+
+    @GetMapping("/execute/{deviceId}/{deviceSecret}/{operation}")
+    public ResponseEntity<String> executeGet(@PathVariable String deviceId, @PathVariable String deviceSecret, @PathVariable String operation) {
+        return ResponseEntity.ok(localDeviceV2Service.executeReadAction(deviceId, deviceSecret, operation));
     }
 
     @GetMapping("/status/{deviceId}/{deviceSecret}")

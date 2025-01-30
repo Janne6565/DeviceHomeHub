@@ -1,12 +1,10 @@
 package com.janne.webserverraspberrypi.services.deviceManager;
 
-import com.janne.webserverraspberrypi.Util;
 import com.janne.webserverraspberrypi.services.RequestService;
 import com.janne.webserverraspberrypi.websockets.ServiceManagerWebsocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +22,6 @@ public class DeviceService {
 
     @Value("${devices}")
     private String deviceIds;
-    @Value("${device_password}")
-    private String devicePasswords;
     @Value("${device_operations}")
     private String deviceOperations;
     @Value("${device_ips}")
@@ -33,7 +29,6 @@ public class DeviceService {
 
     private void initialize() {
         String[] deviceIdsSeperated = deviceIds.split(",");
-        String[] devicePasswordsSeperated = devicePasswords.split(",");
         String[] deviceOperationsSeperated = deviceOperations.split(",");
         String[] deviceIpsSeperated = deviceIps.split(",");
 
@@ -42,7 +37,6 @@ public class DeviceService {
                     Device.builder()
                             .id(deviceIdsSeperated[i])
                             .definedOperations(deviceOperationsSeperated[i].split("\\|"))
-                            .password(devicePasswordsSeperated[i])
                             .ip(deviceIpsSeperated[i])
                             .build()
             );
@@ -50,7 +44,7 @@ public class DeviceService {
         }
     }
 
-    public String executeAction(String deviceId, String operation) {
+    public String executeAction(String deviceId, String devicePassword, String operation) {
         if (!initialized) {
             initialized = true;
             initialize();
@@ -62,7 +56,7 @@ public class DeviceService {
 
         Device device = parsedDevices.get(deviceId);
 
-        String actionUrl = "http://" + device.getIp() + "/" + device.getPassword() + "/" + operation;
+        String actionUrl = "http://" + device.getIp() + "/" + devicePassword + "/" + operation;
         return requestService.sendRequest("POST", actionUrl, "");
     }
 

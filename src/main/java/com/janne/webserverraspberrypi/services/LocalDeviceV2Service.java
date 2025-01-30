@@ -26,9 +26,17 @@ public class LocalDeviceV2Service {
         return sendDeviceRequest("get", deviceId, deviceSecret);
     }
 
+    public String executeWriteAction(String deviceId, String action, String deviceSecret) {
+        return sendDeviceRequest("write/" + action, deviceId, deviceSecret);
+    }
+
+    public String executeReadAction(String deviceId, String action, String deviceSecret) {
+        return sendDeviceRequest("read/" + action, deviceId, deviceSecret);
+    }
+
     private String sendDeviceRequest(String operation, String deviceId, String deviceSecret) {
         String deviceIp = ipRegistryService.getDeviceIp(deviceId);
-        if (deviceIp != null) {
+        if (deviceIp == null) {
             return "Not Found";
         }
         return requestService.sendRequest("POST", deviceIp + "/" + deviceSecret + "/" + operation, "");
