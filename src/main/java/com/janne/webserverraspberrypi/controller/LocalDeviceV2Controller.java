@@ -39,7 +39,7 @@ public class LocalDeviceV2Controller {
 
     @GetMapping("/getBeamerStatus/{deviceId}/{deviceSecret}")
     public ResponseEntity<String> getBeamerStatus(@PathVariable String deviceId, @PathVariable String deviceSecret) {
-        return ResponseEntity.ok(BenqProjectorUtilitys.parseStatusString(localDeviceV2Service.getDeviceStatus(deviceId, deviceSecret)));
+        return ResponseEntity.ok(BenqProjectorUtilitys.parseStatusString(localDeviceV2Service.executeReadAction(deviceId, deviceSecret, "pow=?")));
     }
 
     @GetMapping("/status/{deviceId}/{deviceSecret}")
