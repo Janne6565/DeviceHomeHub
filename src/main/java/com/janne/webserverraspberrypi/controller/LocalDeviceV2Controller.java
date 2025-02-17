@@ -19,7 +19,7 @@ public class LocalDeviceV2Controller {
 
     @PostMapping("/stop/{deviceId}/{deviceSecret}")
     public ResponseEntity<String> stop(@PathVariable String deviceId, @PathVariable String deviceSecret) {
-        return ResponseEntity.ok(localDeviceV2Service.toggleDevice(deviceId, deviceSecret));
+        return ResponseEntity.ok(localDeviceV2Service.stopDevice(deviceId, deviceSecret));
     }
 
     @PostMapping("/toggle/{deviceId}/{deviceSecret}")
