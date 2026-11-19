@@ -38,7 +38,8 @@ public class AmbilightMusicService {
 
     static final String COVER_KEY = "albumCover";
     static final int PRIORITY = 100;
-    static final String ORIGIN = "DeviceHomeHub music mode";
+    /** HyperHDR rejects origins longer than 20 characters with a generic validation error. */
+    static final String ORIGIN = "HubMusicMode";
     static final Duration IMAGE_DURATION = Duration.ofMinutes(10);
     static final Duration REFRESH_INTERVAL = Duration.ofMinutes(4);
 
