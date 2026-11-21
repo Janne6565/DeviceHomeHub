@@ -8,9 +8,7 @@ import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 
 @Slf4j
 @Service
@@ -18,23 +16,6 @@ import java.util.function.BiConsumer;
 public class AudioWebsocketService implements WebSocketHandler {
     private List<WebSocketSession> connections = new ArrayList<WebSocketSession>();
     private Map<String, List<String>> lastObjects = new HashMap<>();
-    private final List<BiConsumer<String, String>> listeners = new CopyOnWriteArrayList<>();
-
-    /**
-     * Registers a callback that receives every (key, value) pair that is published, so other
-     * services can react to song changes without polling the state files themselves.
-     */
-    public void addListener(BiConsumer<String, String> listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * The last value published under {@code key}, or {@code null} if nothing was published yet.
-     */
-    public String getLastValue(String key) {
-        List<String> object = lastObjects.get(key);
-        return object == null ? null : object.get(0);
-    }
 
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     private void cleanUp() {
@@ -87,13 +68,6 @@ public class AudioWebsocketService implements WebSocketHandler {
                 session.sendMessage(message);
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-        for (BiConsumer<String, String> listener : listeners) {
-            try {
-                listener.accept(key, value);
-            } catch (Exception e) {
-                log.warn("Listener failed for key {}", key, e);
             }
         }
     }
